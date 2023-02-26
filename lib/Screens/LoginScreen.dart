@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../Components/textfield.dart';
 import '../Constants.dart' as constant;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'mainscreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -10,8 +14,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  late String email, password;
+  int myvar = 1;
+
   @override
   Widget build(BuildContext context) {
+    final _auth = FirebaseAuth.instance;
     return Scaffold(
       backgroundColor: constant.textPrimary,
       body: Column(
@@ -24,10 +32,16 @@ class _LoginScreenState extends State<LoginScreen> {
           textfield(
             text: 'E-mail',
             isPassword: false,
+            onchanged: (value) {
+              email = value;
+            },
           ),
           textfield(
             text: 'Password',
             isPassword: true,
+            onchanged: (value) {
+              password = value;
+            },
           ),
           ClipRRect(
             borderRadius: BorderRadius.circular(40.0),
@@ -44,7 +58,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: 2,
                           color: constant.dayPrimary,
                         ))),
-                onPressed: () {},
+                onPressed: () async {
+                  try {
+                    final newUser = await _auth.signInWithEmailAndPassword(
+                        email: email, password: password);
+                    //print(newUser.toString());
+
+                    if (newUser.user != null && myvar != 0) {
+                      Navigator.pushReplacement(
+                          context, MaterialPageRoute(builder: (context) => MainScreen()));
+                    }
+                  } catch (e) {
+                    debugPrint('$e');
+                  }
+                },
                 child: Text(
                   'Login',
                   style: TextStyle(
@@ -61,3 +88,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+
